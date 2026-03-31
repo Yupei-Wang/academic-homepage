@@ -21,7 +21,7 @@ export default function News() {
   };
 
   return (
-    <section id="news" className="relative min-h-screen w-full py-24 lg:py-32 bg-[#faf8f5] overflow-hidden">
+    <section id="news" className="relative w-full py-24 lg:py-32 bg-[#faf8f5] overflow-hidden">
       <div className="relative z-10 w-full px-6 lg:px-12">
         <div className="text-center mb-10">
           <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-[#4a4a4a] font-['Bricolage_Grotesque'] mb-4">

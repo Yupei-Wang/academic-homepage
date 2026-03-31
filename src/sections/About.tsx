@@ -7,7 +7,7 @@ export default function About() {
   return (
     <section
       id="about"
-      className="relative min-h-screen w-full py-24 lg:py-32 bg-[#faf8f5] overflow-hidden"
+      className="relative w-full py-24 lg:py-32 bg-[#faf8f5] overflow-hidden"
     >
       {/* Decorative rotating circle */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] pointer-events-none">
