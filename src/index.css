@@ -1,0 +1,131 @@
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* 浅色调配色方案 - 柔和优雅 */
+    --background: 0 0% 98%;
+    --foreground: 340 20% 25%;
+    --card: 0 0% 100%;
+    --card-foreground: 340 20% 25%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 340 20% 25%;
+    --primary: 340 60% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 340 30% 95%;
+    --secondary-foreground: 340 20% 25%;
+    --muted: 340 20% 96%;
+    --muted-foreground: 340 10% 50%;
+    --accent: 340 60% 65%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 340 20% 90%;
+    --input: 340 20% 90%;
+    --ring: 340 60% 65%;
+    --radius: 0.75rem;
+    
+    /* 自定义颜色变量 */
+    --color-rose: #e8b4b8;
+    --color-rose-dark: #d4a5a9;
+    --color-rose-light: #f5e6e8;
+    --color-sage: #b8c5b9;
+    --color-sage-light: #e8efe9;
+    --color-cream: #faf8f5;
+    --color-warm-white: #fefcfb;
+    --color-charcoal: #4a4a4a;
+    --color-soft-gray: #8a8a8a;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    @apply bg-[#faf8f5] text-[#4a4a4a] antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    @apply text-[#4a4a4a];
+  }
+}
+
+@layer utilities {
+  .custom-expo {
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  
+  .fluid-motion {
+    transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  
+  .text-gradient {
+    background: linear-gradient(135deg, #e8b4b8 0%, #d4a5a9 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-sage {
+    background: linear-gradient(135deg, #b8c5b9 0%, #9ab89c 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .glass-morphism {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  
+  .card-3d {
+    transform-style: preserve-3d;
+    perspective: 1000px;
+  }
+  
+  .soft-shadow {
+    box-shadow: 0 4px 20px rgba(232, 180, 184, 0.15),
+                0 8px 40px rgba(0, 0, 0, 0.05);
+  }
+  
+  .soft-shadow-lg {
+    box-shadow: 0 8px 30px rgba(232, 180, 184, 0.2),
+                0 16px 60px rgba(0, 0, 0, 0.08);
+  }
+}
+
+/* Custom scrollbar - 浅色调 */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #faf8f5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #e8b4b8;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d4a5a9;
+}
+
+/* Selection - 柔和粉色 */
+::selection {
+  background: rgba(232, 180, 184, 0.4);
+  color: #4a4a4a;
+}
