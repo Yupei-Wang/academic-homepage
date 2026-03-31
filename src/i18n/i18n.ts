@@ -7,7 +7,7 @@ const dict: Dict = {
     // Navigation
     nav_about: '关于我',
     nav_research: '研究领域',
-    nav_news: '新闻',
+    nav_news: '动态',
     nav_publications: '发表论文',
     nav_projects: '项目',
     nav_contact: '联系我',
@@ -66,7 +66,7 @@ const dict: Dict = {
     footer_contact_about_text: '人工智能研究者，专注于大语言模型、智能体与社会模拟。致力于推动AI技术的发展，构建更智能、更可靠的人工智能系统。',
 
     // News
-    news_title: '新闻',
+    news_title: '动态',
     news_filter_all: '全部',
     news_filter_blog: '博客',
     news_filter_note: '阅读笔记',
@@ -153,8 +153,8 @@ const dict: Dict = {
       'AI researcher focused on large language models, agents, and social simulation. Dedicated to advancing AI technology and building smarter, more reliable AI systems.',
 
     // News
-    nav_news: 'News',
-    news_title: 'News',
+    nav_news: 'Updates',
+    news_title: 'Updates',
     news_filter_all: 'All',
     news_filter_blog: 'Blogs',
     news_filter_note: 'Reading notes',
