@@ -77,7 +77,7 @@ export default function Hero() {
               className="relative w-72 md:w-96 lg:w-[420px] aspect-[3/4] rounded-3xl overflow-hidden soft-shadow-lg"
             >
               <img
-                src="/hero-portrait.jpg"
+                src="hero-portrait.jpg"
                 alt="Pei Wang"
                 className="w-full h-full object-cover"
               />
