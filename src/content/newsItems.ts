@@ -14,6 +14,20 @@ export type NewsItem = {
 // - 如果没有 href，也可以只当作“摘要/记录”
 export const newsItems: NewsItem[] = [
   {
+    id: 'news-2026-04-02-1',
+    date: '2026-04-02',
+    kind: 'blog',
+    title: {
+      zh: 'Lipschitz 连续与 Lipschitz 常数：定义、性质与常数估计',
+      en: 'Lipschitz Continuity and Lipschitz Constants: Definitions, Properties, and Estimation',
+    },
+    excerpt: {
+      zh: '梳理 Lipschitz 连续的核心定义、常见等价形式，并总结从函数/模型结构推导或估计 Lipschitz 常数的实用方法与注意事项。',
+      en: 'A structured summary of Lipschitz continuity: key definitions, common equivalent formulations, and practical ways to derive or estimate Lipschitz constants from function/model structure.',
+    },
+    href: 'https://my.feishu.cn/wiki/BoEpw6DSKiuiJpkrnXgc4BvRnvh?from=from_copylink',
+  },
+  {
     id: 'news-2026-03-21-1',
     date: '2026-03-21',
     kind: 'blog',
