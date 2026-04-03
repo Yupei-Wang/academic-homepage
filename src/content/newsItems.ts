@@ -5,13 +5,14 @@ export type NewsItem = {
   date: string; // ISO date string: YYYY-MM-DD
   kind: NewsKind;
   title: { zh: string; en: string };
-  excerpt: { zh: string; en: string };
+  excerpt?: { zh: string; en: string };
   href?: string;
 };
 
 // 你可以不定期在这里添加博客/阅读笔记条目：
 // - href 可填外链（例如个人博客链接）
-// - 如果没有 href，也可以只当作“摘要/记录”
+// - 如果内容很短，可以只写标题（不填 excerpt）
+// - 如果没有 href，也可以只当作“记录”
 export const newsItems: NewsItem[] = [
   {
     id: 'news-2026-04-02-1',

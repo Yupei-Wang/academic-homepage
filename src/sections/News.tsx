@@ -1,13 +1,18 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useI18n } from '@/i18n/I18nProvider';
 import { newsItems, type NewsKind } from '@/content/newsItems';
+import { hasSupabaseConfig, supabase, type Thought } from '@/lib/supabase';
 
 type Filter = 'all' | NewsKind;
 
 export default function News() {
   const { t, lang } = useI18n();
   const [filter, setFilter] = useState<Filter>('all');
+  const [thoughts, setThoughts] = useState<Thought[]>([]);
+  const [title, setTitle] = useState('');
+  const [content, setContent] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const filtered = useMemo(() => {
     const sorted = [...newsItems].sort((a, b) => (a.date < b.date ? 1 : -1));
@@ -18,6 +23,39 @@ export default function News() {
   const kindLabel = (kind: NewsKind) => {
     if (kind === 'blog') return t('news_filter_blog');
     return t('news_filter_note');
+  };
+
+  const loadThoughts = async () => {
+    if (!supabase) return;
+    const { data } = await supabase
+      .from('thoughts')
+      .select('id,title,content,created_at')
+      .order('created_at', { ascending: false })
+      .limit(20);
+    setThoughts((data ?? []) as Thought[]);
+  };
+
+  useEffect(() => {
+    void loadThoughts();
+  }, []);
+
+  const onSubmitThought = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!supabase || !title.trim()) return;
+    setLoading(true);
+    const payload = {
+      title: title.trim(),
+      content: content.trim() || null,
+    };
+    const { error } = await supabase.from('thoughts').insert(payload);
+    setLoading(false);
+    if (error) {
+      alert(lang === 'zh' ? `保存失败：${error.message}` : `Save failed: ${error.message}`);
+      return;
+    }
+    setTitle('');
+    setContent('');
+    await loadThoughts();
   };
 
   return (
@@ -95,11 +133,79 @@ export default function News() {
               <h3 className="mt-4 text-xl md:text-2xl font-bold text-[#4a4a4a] font-['Bricolage_Grotesque']">
                 {lang === 'zh' ? item.title.zh : item.title.en}
               </h3>
-              <p className="mt-3 text-[#8a8a8a] leading-relaxed">
-                {lang === 'zh' ? item.excerpt.zh : item.excerpt.en}
-              </p>
+              {item.excerpt ? (
+                <p className="mt-3 text-[#8a8a8a] leading-relaxed">
+                  {lang === 'zh' ? item.excerpt.zh : item.excerpt.en}
+                </p>
+              ) : null}
             </article>
           ))}
+        </div>
+
+        <div className="max-w-3xl mx-auto mt-16">
+          <h3 className="text-2xl md:text-3xl font-bold text-[#4a4a4a] font-['Bricolage_Grotesque'] mb-4">
+            {lang === 'zh' ? '随笔 / 感想' : 'Thoughts'}
+          </h3>
+          <p className="text-[#8a8a8a] mb-6">
+            {lang === 'zh'
+              ? '你可以直接在这里写短感悟并保存到 Supabase。'
+              : 'Write short thoughts here and save them to Supabase.'}
+          </p>
+
+          {!hasSupabaseConfig ? (
+            <div className="p-4 rounded-xl bg-white border border-[#e8b4b8]/30 text-sm text-[#8a8a8a]">
+              {lang === 'zh'
+                ? '未检测到 Supabase 配置。请在环境变量中设置 VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY。'
+                : 'Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.'}
+            </div>
+          ) : (
+            <>
+              <form onSubmit={onSubmitThought} className="p-5 rounded-2xl bg-white border border-[#e8b4b8]/20 space-y-3">
+                <input
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder={lang === 'zh' ? '标题（必填）' : 'Title (required)'}
+                  className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
+                />
+                <textarea
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder={lang === 'zh' ? '内容（可选）' : 'Content (optional)'}
+                  rows={3}
+                  className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
+                />
+                <button
+                  type="submit"
+                  disabled={loading || !title.trim()}
+                  className="px-5 py-2 rounded-full bg-[#e8b4b8] text-white text-sm font-medium disabled:opacity-60"
+                >
+                  {loading
+                    ? lang === 'zh'
+                      ? '保存中...'
+                      : 'Saving...'
+                    : lang === 'zh'
+                      ? '保存感想'
+                      : 'Save thought'}
+                </button>
+              </form>
+
+              <div className="mt-6 space-y-3">
+                {thoughts.map((item) => (
+                  <article key={item.id} className="p-4 rounded-xl bg-white border border-[#e8b4b8]/20">
+                    <div className="flex items-center justify-between gap-2">
+                      <h4 className="font-semibold text-[#4a4a4a]">{item.title}</h4>
+                      <span className="text-xs text-[#8a8a8a]">
+                        {new Date(item.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {item.content ? (
+                      <p className="mt-2 text-sm text-[#8a8a8a] leading-relaxed">{item.content}</p>
+                    ) : null}
+                  </article>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       </div>
     </section>
