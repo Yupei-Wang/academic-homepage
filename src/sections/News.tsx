@@ -169,7 +169,6 @@ export default function News() {
               <h3 className="text-xl md:text-2xl font-bold text-[#4a4a4a] font-['Bricolage_Grotesque'] mb-2">
                 心情
               </h3>
-              <p className="text-[#8a8a8a] text-sm mb-4">欢迎来到这里，欢迎分享你的当下，也欢迎就研究与生活和我交流。</p>
               <a
                 href="#/moods"
                 className="inline-flex items-center text-xs text-[#e8b4b8] hover:text-[#d4a5a9] font-medium mb-4"
@@ -185,7 +184,7 @@ export default function News() {
                 <>
                   {thoughts.length === 0 ? (
                     <div className="p-3 rounded-xl bg-[#fff7f8] border border-[#e8b4b8]/30 text-sm text-[#8a8a8a]">
-                      欢迎来发布第一条心情，写点什么都可以 :)
+                      欢迎来发布一条心情，写点什么都可以 :)
                     </div>
                   ) : null}
                   <form onSubmit={onSubmitThought} className="mt-2 p-4 rounded-2xl bg-white border border-[#e8b4b8]/20 space-y-3">
