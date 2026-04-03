@@ -19,7 +19,7 @@ export const newsItems: NewsItem[] = [
     date: '2026-04-02',
     kind: 'blog',
     title: {
-      zh: 'Lipschitz 连续与 Lipschitz 常数：定义、性质与常数估计 ',
+      zh: 'Lipschitz 连续与 Lipschitz 常数 ',
       en: 'Lipschitz Continuity and Lipschitz Constants: Definitions, Properties, and Estimation',
     },
     excerpt: {
