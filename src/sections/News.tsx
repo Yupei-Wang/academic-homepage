@@ -169,7 +169,7 @@ export default function News() {
               <h3 className="text-xl md:text-2xl font-bold text-[#4a4a4a] font-['Bricolage_Grotesque'] mb-2">
                 心情
               </h3>
-              <p className="text-[#8a8a8a] text-sm mb-4">写一句当下的心情，作为这段时间的小注脚。</p>
+              <p className="text-[#8a8a8a] text-sm mb-4">欢迎来到这里，欢迎分享你的当下，也欢迎就研究与生活和我交流。</p>
               <a
                 href="#/moods"
                 className="inline-flex items-center text-xs text-[#e8b4b8] hover:text-[#d4a5a9] font-medium mb-4"
@@ -183,6 +183,11 @@ export default function News() {
                 </div>
               ) : (
                 <>
+                  {thoughts.length === 0 ? (
+                    <div className="p-3 rounded-xl bg-[#fff7f8] border border-[#e8b4b8]/30 text-sm text-[#8a8a8a]">
+                      欢迎来发布第一条心情，写点什么都可以 :)
+                    </div>
+                  ) : null}
                   <form onSubmit={onSubmitThought} className="mt-2 p-4 rounded-2xl bg-white border border-[#e8b4b8]/20 space-y-3">
                     <div>
                       <label className="block text-sm text-[#8a8a8a] mb-1">身份（必选）</label>
@@ -347,68 +352,75 @@ export default function News() {
                   Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.
                 </div>
               ) : (
-                <form onSubmit={onSubmitThought} className="mt-2 p-4 rounded-2xl bg-white border border-[#e8b4b8]/20 space-y-3">
-                  <div>
-                    <label className="block text-sm text-[#8a8a8a] mb-1">Identity (required)</label>
-                    <select
-                      value={authorIdentity}
-                      onChange={(e) => setAuthorIdentity(e.target.value as AuthorIdentityKey | '')}
-                      className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 bg-white text-sm text-[#4a4a4a] focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
+                <>
+                  {thoughts.length === 0 ? (
+                    <div className="p-3 rounded-xl bg-[#fff7f8] border border-[#e8b4b8]/30 text-sm text-[#8a8a8a]">
+                      Welcome! Be the first to post a mood note :)
+                    </div>
+                  ) : null}
+                  <form onSubmit={onSubmitThought} className="mt-2 p-4 rounded-2xl bg-white border border-[#e8b4b8]/20 space-y-3">
+                    <div>
+                      <label className="block text-sm text-[#8a8a8a] mb-1">Identity (required)</label>
+                      <select
+                        value={authorIdentity}
+                        onChange={(e) => setAuthorIdentity(e.target.value as AuthorIdentityKey | '')}
+                        className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 bg-white text-sm text-[#4a4a4a] focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
+                      >
+                        <option value="">Select identity</option>
+                        {AUTHOR_IDENTITY_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.en}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <input
+                      value={authorNickname}
+                      onChange={(e) => setAuthorNickname(e.target.value)}
+                      placeholder="Nickname (required, e.g. Alex)"
+                      className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
+                    />
+                    <input
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="Title (required)"
+                      className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
+                    />
+                    <textarea
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                      placeholder="Content (optional)"
+                      rows={3}
+                      className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
+                    />
+                    <div className="flex flex-wrap items-center gap-3">
+                      <label className="text-sm text-[#8a8a8a]">Mood:</label>
+                      <select
+                        value={mood}
+                        onChange={(e) => setMood(e.target.value as MoodType | '')}
+                        className="px-3 py-2 rounded-xl border border-[#e8b4b8]/30 bg-white text-sm text-[#4a4a4a]"
+                      >
+                        <option value="">Not set (optional)</option>
+                        <option value="positive">😊 Happy</option>
+                        <option value="neutral">😌 Calm</option>
+                        <option value="tired">🥱 Tired</option>
+                        <option value="stressed">😣 Stressed</option>
+                        <option value="excited">🤩 Excited</option>
+                        <option value="anxious">😟 Anxious</option>
+                        <option value="confused">🤔 Confused</option>
+                        <option value="grateful">🙏 Grateful</option>
+                        <option value="sad">😢 Sad</option>
+                      </select>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={loading || !title.trim() || !authorIdentity || !authorNickname.trim()}
+                      className="px-5 py-2 rounded-full bg-[#e8b4b8] text-white text-sm font-medium disabled:opacity-60"
                     >
-                      <option value="">Select identity</option>
-                      {AUTHOR_IDENTITY_OPTIONS.map((o) => (
-                        <option key={o.value} value={o.value}>
-                          {o.en}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <input
-                    value={authorNickname}
-                    onChange={(e) => setAuthorNickname(e.target.value)}
-                    placeholder="Nickname (required, e.g. Alex)"
-                    className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
-                  />
-                  <input
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Title (required)"
-                    className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
-                  />
-                  <textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
-                    placeholder="Content (optional)"
-                    rows={3}
-                    className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
-                  />
-                  <div className="flex flex-wrap items-center gap-3">
-                    <label className="text-sm text-[#8a8a8a]">Mood:</label>
-                    <select
-                      value={mood}
-                      onChange={(e) => setMood(e.target.value as MoodType | '')}
-                      className="px-3 py-2 rounded-xl border border-[#e8b4b8]/30 bg-white text-sm text-[#4a4a4a]"
-                    >
-                      <option value="">Not set (optional)</option>
-                      <option value="positive">😊 Happy</option>
-                      <option value="neutral">😌 Calm</option>
-                      <option value="tired">🥱 Tired</option>
-                      <option value="stressed">😣 Stressed</option>
-                      <option value="excited">🤩 Excited</option>
-                      <option value="anxious">😟 Anxious</option>
-                      <option value="confused">🤔 Confused</option>
-                      <option value="grateful">🙏 Grateful</option>
-                      <option value="sad">😢 Sad</option>
-                    </select>
-                  </div>
-                  <button
-                    type="submit"
-                    disabled={loading || !title.trim() || !authorIdentity || !authorNickname.trim()}
-                    className="px-5 py-2 rounded-full bg-[#e8b4b8] text-white text-sm font-medium disabled:opacity-60"
-                  >
-                    {loading ? 'Saving...' : 'Save mood'}
-                  </button>
-                </form>
+                      {loading ? 'Saving...' : 'Save mood'}
+                    </button>
+                  </form>
+                </>
               )}
             </div>
           </div>
