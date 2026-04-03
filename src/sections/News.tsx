@@ -25,14 +25,33 @@ export default function News() {
     return t('news_filter_note');
   };
 
+  const describeNetworkError = (message: string) => {
+    const isFetchFail =
+      message.includes('Failed to fetch') ||
+      message.includes('NetworkError') ||
+      message.includes('Load failed');
+    if (!isFetchFail) return message;
+    return lang === 'zh'
+      ? `${message}\n\n常见原因：当前网络无法稳定访问 Supabase（国内环境较常见），可换网络/代理后再试；或在浏览器开发者工具 → Network 中查看对 *.supabase.co 的请求是否被拦截。另请确认 GitHub Secrets 里的 VITE_SUPABASE_URL 为 https://xxx.supabase.co 且密钥未多余空格。`
+      : `${message}\n\nCommon causes: your network cannot reach Supabase reliably (try another network/VPN), or the request is blocked—check DevTools → Network for *.supabase.co. Also verify VITE_SUPABASE_URL is https://xxx.supabase.co and keys have no extra spaces in GitHub Secrets.`;
+  };
+
   const loadThoughts = async () => {
     if (!supabase) return;
-    const { data } = await supabase
-      .from('thoughts')
-      .select('id,title,content,created_at')
-      .order('created_at', { ascending: false })
-      .limit(20);
-    setThoughts((data ?? []) as Thought[]);
+    try {
+      const { data, error } = await supabase
+        .from('thoughts')
+        .select('id,title,content,created_at')
+        .order('created_at', { ascending: false })
+        .limit(20);
+      if (error) {
+        console.error(error);
+        return;
+      }
+      setThoughts((data ?? []) as Thought[]);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   useEffect(() => {
@@ -43,19 +62,33 @@ export default function News() {
     e.preventDefault();
     if (!supabase || !title.trim()) return;
     setLoading(true);
-    const payload = {
-      title: title.trim(),
-      content: content.trim() || null,
-    };
-    const { error } = await supabase.from('thoughts').insert(payload);
-    setLoading(false);
-    if (error) {
-      alert(lang === 'zh' ? `保存失败：${error.message}` : `Save failed: ${error.message}`);
-      return;
+    try {
+      const payload = {
+        title: title.trim(),
+        content: content.trim() || null,
+      };
+      const { error } = await supabase.from('thoughts').insert(payload);
+      if (error) {
+        alert(
+          lang === 'zh'
+            ? `保存失败：${describeNetworkError(error.message)}`
+            : `Save failed: ${describeNetworkError(error.message)}`,
+        );
+        return;
+      }
+      setTitle('');
+      setContent('');
+      await loadThoughts();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      alert(
+        lang === 'zh'
+          ? `保存失败：${describeNetworkError(message)}`
+          : `Save failed: ${describeNetworkError(message)}`,
+      );
+    } finally {
+      setLoading(false);
     }
-    setTitle('');
-    setContent('');
-    await loadThoughts();
   };
 
   return (
