@@ -6,25 +6,37 @@ import Research from './sections/Research';
 import Publications from './sections/Publications';
 import Footer from './sections/Footer';
 import MoodPage from './pages/MoodPage';
+import BlogPage from './pages/BlogPage';
 import { useEffect, useState } from 'react';
 
 import './App.css';
 
 function App() {
-  const [isMoodPage, setIsMoodPage] = useState(window.location.hash === '#/moods');
+  const [route, setRoute] = useState<'home' | 'moods' | 'blogs'>(() => {
+    const hash = window.location.hash;
+    if (hash === '#/moods') return 'moods';
+    if (hash === '#/blogs') return 'blogs';
+    return 'home';
+  });
 
   useEffect(() => {
     const onHashChange = () => {
-      setIsMoodPage(window.location.hash === '#/moods');
+      const hash = window.location.hash;
+      if (hash === '#/moods') {
+        setRoute('moods');
+      } else if (hash === '#/blogs') {
+        setRoute('blogs');
+      } else {
+        setRoute('home');
+      }
       window.scrollTo({ top: 0, behavior: 'auto' });
     };
     window.addEventListener('hashchange', onHashChange);
     return () => window.removeEventListener('hashchange', onHashChange);
   }, []);
 
-  if (isMoodPage) {
-    return <MoodPage />;
-  }
+  if (route === 'moods') return <MoodPage />;
+  if (route === 'blogs') return <BlogPage />;
 
   return (
     <div className="relative min-h-screen bg-[#faf8f5]">

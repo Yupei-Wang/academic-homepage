@@ -6,26 +6,26 @@ import { hasSupabaseConfig, supabase, type Thought, type MoodType } from '@/lib/
 const moodLabel = (m: MoodType | null, lang: 'zh' | 'en') => {
   if (!m) return lang === 'zh' ? '未分类' : 'Uncategorized';
   const mapZh: Record<MoodType, string> = {
-    positive: '开心',
-    neutral: '平静',
-    tired: '疲惫',
-    stressed: '压力大',
-    excited: '兴奋',
-    anxious: '焦虑',
-    confused: '困惑',
-    grateful: '感激',
-    sad: '难受',
+    positive: '😊 开心',
+    neutral: '😌 平静',
+    tired: '🥱 疲惫',
+    stressed: '😣 压力大',
+    excited: '🤩 兴奋',
+    anxious: '😟 焦虑',
+    confused: '🤔 困惑',
+    grateful: '🙏 感激',
+    sad: '😢 难受',
   };
   const mapEn: Record<MoodType, string> = {
-    positive: 'Happy',
-    neutral: 'Calm',
-    tired: 'Tired',
-    stressed: 'Stressed',
-    excited: 'Excited',
-    anxious: 'Anxious',
-    confused: 'Confused',
-    grateful: 'Grateful',
-    sad: 'Sad',
+    positive: '😊 Happy',
+    neutral: '😌 Calm',
+    tired: '🥱 Tired',
+    stressed: '😣 Stressed',
+    excited: '🤩 Excited',
+    anxious: '😟 Anxious',
+    confused: '🤔 Confused',
+    grateful: '🙏 Grateful',
+    sad: '😢 Sad',
   };
   return lang === 'zh' ? mapZh[m] : mapEn[m];
 };

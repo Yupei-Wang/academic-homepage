@@ -1,9 +1,7 @@
-export type NewsKind = 'blog' | 'note';
-
 export type NewsItem = {
   id: string;
   date: string; // ISO date string: YYYY-MM-DD
-  kind: NewsKind;
+  kind: 'blog';
   title: { zh: string; en: string };
   excerpt?: { zh: string; en: string };
   href?: string;

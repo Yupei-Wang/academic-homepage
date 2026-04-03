@@ -69,7 +69,6 @@ const dict: Dict = {
     news_title: '动态',
     news_filter_all: '全部',
     news_filter_blog: '博客',
-    news_filter_note: '阅读笔记',
     news_btn_read: '阅读',
 
     // About - Institutions
@@ -157,7 +156,6 @@ const dict: Dict = {
     news_title: 'Updates',
     news_filter_all: 'All',
     news_filter_blog: 'Blogs',
-    news_filter_note: 'Reading notes',
     news_btn_read: 'Read',
 
     // About - Institutions

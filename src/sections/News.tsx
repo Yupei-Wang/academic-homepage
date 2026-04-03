@@ -1,30 +1,20 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useI18n } from '@/i18n/I18nProvider';
-import { newsItems, type NewsKind } from '@/content/newsItems';
+import { newsItems } from '@/content/newsItems';
 import { hasSupabaseConfig, supabase, type Thought, type MoodType } from '@/lib/supabase';
-
-type Filter = 'all' | NewsKind;
 
 export default function News() {
   const { t, lang } = useI18n();
-  const [filter, setFilter] = useState<Filter>('all');
   const [thoughts, setThoughts] = useState<Thought[]>([]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [mood, setMood] = useState<MoodType | ''>('');
   const [loading, setLoading] = useState(false);
 
-  const filtered = useMemo(() => {
-    const sorted = [...newsItems].sort((a, b) => (a.date < b.date ? 1 : -1));
-    if (filter === 'all') return sorted;
-    return sorted.filter((i) => i.kind === filter);
-  }, [filter]);
-
-  const kindLabel = (kind: NewsKind) => {
-    if (kind === 'blog') return t('news_filter_blog');
-    return t('news_filter_note');
-  };
+  const sortedNews = [...newsItems].sort((a, b) => (a.date < b.date ? 1 : -1));
+  const totalBlogs = sortedNews.length;
+  const latestBlogs = sortedNews.slice(0, 2);
 
   const describeNetworkError = (message: string) => {
     const isFetchFail =
@@ -102,179 +92,265 @@ export default function News() {
             {t('news_title')}
           </h2>
           <p className="text-[#8a8a8a] text-lg max-w-2xl mx-auto">
-            {lang === 'zh' ? '博客更新与阅读笔记，持续记录研究过程。' : 'Blogs and reading notes to keep track of the research journey.'}
-          </p>
-        </div>
-
-        <div className="flex flex-wrap gap-3 justify-center mb-12">
-          <button
-            type="button"
-            onClick={() => setFilter('all')}
-            className={`px-5 py-2 rounded-full border transition-colors duration-300 text-sm ${
-              filter === 'all'
-                ? 'bg-[#e8b4b8] border-[#e8b4b8] text-white'
-                : 'bg-white border-[#e8b4b8]/30 text-[#8a8a8a] hover:border-[#e8b4b8]/60'
-            }`}
-          >
-            {t('news_filter_all')}
-          </button>
-          <button
-            type="button"
-            onClick={() => setFilter('blog')}
-            className={`px-5 py-2 rounded-full border transition-colors duration-300 text-sm ${
-              filter === 'blog'
-                ? 'bg-[#e8b4b8] border-[#e8b4b8] text-white'
-                : 'bg-white border-[#e8b4b8]/30 text-[#8a8a8a] hover:border-[#e8b4b8]/60'
-            }`}
-          >
-            {t('news_filter_blog')}
-          </button>
-          <button
-            type="button"
-            onClick={() => setFilter('note')}
-            className={`px-5 py-2 rounded-full border transition-colors duration-300 text-sm ${
-              filter === 'note'
-                ? 'bg-[#e8b4b8] border-[#e8b4b8] text-white'
-                : 'bg-white border-[#e8b4b8]/30 text-[#8a8a8a] hover:border-[#e8b4b8]/60'
-            }`}
-          >
-            {t('news_filter_note')}
-          </button>
-        </div>
-
-        <div className="space-y-6 max-w-3xl mx-auto">
-          {filtered.map((item) => (
-            <article key={item.id} className="p-6 rounded-2xl bg-white border border-[#e8b4b8]/20 hover:border-[#e8b4b8]/40 transition-colors duration-300">
-              <div className="flex flex-wrap items-center gap-3 justify-between">
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="px-3 py-1 bg-[#f5e6e8] text-[#d4a5a9] text-xs font-medium rounded-full border border-[#e8b4b8]/20">
-                    {kindLabel(item.kind)}
-                  </span>
-                  <span className="text-[#8a8a8a] text-sm">{item.date}</span>
-                </div>
-
-                {item.href ? (
-                  <a
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-[#e8b4b8] hover:text-[#d4a5a9] text-sm font-medium transition-colors"
-                  >
-                    {t('news_btn_read')}
-                    <ExternalLink size={14} />
-                  </a>
-                ) : null}
-              </div>
-
-              <h3 className="mt-4 text-xl md:text-2xl font-bold text-[#4a4a4a] font-['Bricolage_Grotesque']">
-                {lang === 'zh' ? item.title.zh : item.title.en}
-              </h3>
-              {item.excerpt ? (
-                <p className="mt-3 text-[#8a8a8a] leading-relaxed">
-                  {lang === 'zh' ? item.excerpt.zh : item.excerpt.en}
-                </p>
-              ) : null}
-            </article>
-          ))}
-        </div>
-
-        <div className="max-w-3xl mx-auto mt-16">
-          <h3 className="text-2xl md:text-3xl font-bold text-[#4a4a4a] font-['Bricolage_Grotesque'] mb-4">
-            {lang === 'zh' ? '心情' : 'Mood'}
-          </h3>
-          <p className="text-[#8a8a8a] mb-6">
             {lang === 'zh'
-              ? '你可以直接在这里写心情并保存到 Supabase。'
-              : 'Write moods here and save them to Supabase.'}
+              ? '博客更新与心情记录，简单记下研究路上的想法。'
+              : 'Blog updates and mood notes along the research journey.'}
           </p>
-          <a
-            href="#/moods"
-            className="inline-flex items-center text-sm text-[#e8b4b8] hover:text-[#d4a5a9] font-medium mb-5"
-          >
-            {lang === 'zh' ? '查看全部心情卡片 ->' : 'View all mood cards ->'}
-          </a>
-
-          {!hasSupabaseConfig ? (
-            <div className="p-4 rounded-xl bg-white border border-[#e8b4b8]/30 text-sm text-[#8a8a8a]">
-              {lang === 'zh'
-                ? '未检测到 Supabase 配置。请在环境变量中设置 VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY。'
-                : 'Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.'}
-            </div>
-          ) : (
-            <>
-              <form onSubmit={onSubmitThought} className="p-5 rounded-2xl bg-white border border-[#e8b4b8]/20 space-y-3">
-                <input
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder={lang === 'zh' ? '标题（必填）' : 'Title (required)'}
-                  className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
-                />
-                <textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  placeholder={lang === 'zh' ? '内容（可选）' : 'Content (optional)'}
-                  rows={3}
-                  className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
-                />
-                <div className="flex flex-wrap items-center gap-3">
-                  <label className="text-sm text-[#8a8a8a]">
-                    {lang === 'zh' ? '情绪标签：' : 'Mood:'}
-                  </label>
-                  <select
-                    value={mood}
-                    onChange={(e) => setMood(e.target.value as MoodType | '')}
-                    className="px-3 py-2 rounded-xl border border-[#e8b4b8]/30 bg-white text-sm text-[#4a4a4a]"
-                  >
-                    <option value="">
-                      {lang === 'zh' ? '未选择（可选）' : 'Not set (optional)'}
-                    </option>
-                    <option value="positive">{lang === 'zh' ? '开心' : 'Happy'}</option>
-                    <option value="neutral">{lang === 'zh' ? '平静' : 'Calm'}</option>
-                    <option value="tired">{lang === 'zh' ? '疲惫' : 'Tired'}</option>
-                    <option value="stressed">{lang === 'zh' ? '压力大' : 'Stressed'}</option>
-                    <option value="excited">{lang === 'zh' ? '兴奋' : 'Excited'}</option>
-                    <option value="anxious">{lang === 'zh' ? '焦虑' : 'Anxious'}</option>
-                    <option value="confused">{lang === 'zh' ? '困惑' : 'Confused'}</option>
-                    <option value="grateful">{lang === 'zh' ? '感激' : 'Grateful'}</option>
-                    <option value="sad">{lang === 'zh' ? '难受' : 'Sad'}</option>
-                  </select>
-                </div>
-                <button
-                  type="submit"
-                  disabled={loading || !title.trim()}
-                  className="px-5 py-2 rounded-full bg-[#e8b4b8] text-white text-sm font-medium disabled:opacity-60"
-                >
-                  {loading
-                    ? lang === 'zh'
-                      ? '保存中...'
-                      : 'Saving...'
-                    : lang === 'zh'
-                      ? '保存心情'
-                      : 'Save mood'}
-                </button>
-              </form>
-
-              <div className="mt-6 space-y-2">
-                {thoughts.slice(0, 2).map((item) => (
-                  <div key={item.id} className="flex items-center justify-between gap-2 text-sm">
-                    <span className="truncate text-[#4a4a4a] max-w-[70%]">{item.title}</span>
-                    <span className="text-xs text-[#8a8a8a]">
-                      {new Date(item.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                ))}
-                {thoughts.length > 2 ? (
-                  <a
-                    href="#/moods"
-                    className="inline-block mt-1 text-xs text-[#e8b4b8] hover:text-[#d4a5a9]"
-                  >
-                    {lang === 'zh' ? '查看更多心情…' : 'View more moods…'}
-                  </a>
-                ) : null}
-              </div>
-            </>
-          )}
         </div>
+
+        {lang === 'zh' ? (
+          <div className="max-w-5xl mx-auto mt-10 lg:mt-14 grid gap-10 lg:grid-cols-[minmax(0,1.8fr)_minmax(0,1.2fr)] items-start">
+            <div className="bg-white/80 rounded-2xl border border-[#e8b4b8]/30 p-5 lg:p-6 shadow-[0_12px_30px_rgba(0,0,0,0.03)]">
+              <h3 className="text-xl md:text-2xl font-bold text-[#4a4a4a] font-['Bricolage_Grotesque'] mb-2">
+                博客
+              </h3>
+              <p className="text-[#8a8a8a] text-sm mb-3">最近两篇更新</p>
+              <div className="flex justify-end mb-3">
+                <a
+                  href="#/blogs"
+                  className="text-xs text-[#e8b4b8] hover:text-[#d4a5a9] font-medium"
+                >
+                  {`查看全部博客（共有${totalBlogs}篇）`} &rarr;
+                </a>
+              </div>
+              <div className="space-y-6">
+              {latestBlogs.map((item) => (
+                <article
+                  key={item.id}
+                  className="p-6 rounded-2xl bg-white border border-[#e8b4b8]/20 hover:border-[#e8b4b8]/40 transition-colors duration-300"
+                >
+                  <div className="flex flex-wrap items-center gap-3 justify-between">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="px-3 py-1 bg-[#f5e6e8] text-[#d4a5a9] text-xs font-medium rounded-full border border-[#e8b4b8]/20">
+                        {t('news_filter_blog')}
+                      </span>
+                      <span className="text-[#8a8a8a] text-sm">{item.date}</span>
+                    </div>
+
+                    {item.href ? (
+                      <a
+                        href={item.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[#e8b4b8] hover:text-[#d4a5a9] text-sm font-medium transition-colors"
+                      >
+                        {t('news_btn_read')}
+                        <ExternalLink size={14} />
+                      </a>
+                    ) : null}
+                  </div>
+
+                  <h3 className="mt-4 text-xl md:text-2xl font-bold text-[#4a4a4a] font-['Bricolage_Grotesque']">
+                    {item.title.zh}
+                  </h3>
+                  {item.excerpt ? (
+                    <p className="mt-3 text-[#8a8a8a] leading-relaxed">{item.excerpt.zh}</p>
+                  ) : null}
+                </article>
+              ))}
+              </div>
+            </div>
+
+            <div className="bg-white/80 rounded-2xl border border-[#e8b4b8]/30 p-5 lg:p-6 shadow-[0_12px_30px_rgba(0,0,0,0.03)]">
+              <h3 className="text-xl md:text-2xl font-bold text-[#4a4a4a] font-['Bricolage_Grotesque'] mb-2">
+                心情
+              </h3>
+              <p className="text-[#8a8a8a] text-sm mb-4">写一句当下的心情，作为这段时间的小注脚。</p>
+              <a
+                href="#/moods"
+                className="inline-flex items-center text-xs text-[#e8b4b8] hover:text-[#d4a5a9] font-medium mb-4"
+              >
+                查看全部心情卡片 &rarr;
+              </a>
+
+              {!hasSupabaseConfig ? (
+                <div className="p-4 rounded-xl bg-white border border-[#e8b4b8]/30 text-sm text-[#8a8a8a]">
+                  未检测到 Supabase 配置。请在环境变量中设置 VITE_SUPABASE_URL 和 VITE_SUPABASE_ANON_KEY。
+                </div>
+              ) : (
+                <>
+                  <form onSubmit={onSubmitThought} className="mt-2 p-4 rounded-2xl bg-white border border-[#e8b4b8]/20 space-y-3">
+                    <input
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      placeholder="标题（必填）"
+                      className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
+                    />
+                    <textarea
+                      value={content}
+                      onChange={(e) => setContent(e.target.value)}
+                      placeholder="内容（可选）"
+                      rows={3}
+                      className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
+                    />
+                    <div className="flex flex-wrap items-center gap-3">
+                      <label className="text-sm text-[#8a8a8a]">情绪标签：</label>
+                      <select
+                        value={mood}
+                        onChange={(e) => setMood(e.target.value as MoodType | '')}
+                        className="px-3 py-2 rounded-xl border border-[#e8b4b8]/30 bg-white text-sm text-[#4a4a4a]"
+                      >
+                        <option value="">未选择（可选）</option>
+                        <option value="positive">😊 开心</option>
+                        <option value="neutral">😌 平静</option>
+                        <option value="tired">🥱 疲惫</option>
+                        <option value="stressed">😣 压力大</option>
+                        <option value="excited">🤩 兴奋</option>
+                        <option value="anxious">😟 焦虑</option>
+                        <option value="confused">🤔 困惑</option>
+                        <option value="grateful">🙏 感激</option>
+                        <option value="sad">😢 难受</option>
+                      </select>
+                    </div>
+                    <button
+                      type="submit"
+                      disabled={loading || !title.trim()}
+                      className="px-5 py-2 rounded-full bg-[#e8b4b8] text-white text-sm font-medium disabled:opacity-60"
+                    >
+                      {loading ? '保存中...' : '保存心情'}
+                    </button>
+                  </form>
+
+                  <div className="mt-4 space-y-2">
+                    {thoughts.slice(0, 2).map((item) => (
+                      <div key={item.id} className="flex items-center justify-between gap-2 text-sm">
+                        <span className="truncate text-[#4a4a4a] max-w-[70%]">{item.title}</span>
+                        <span className="text-xs text-[#8a8a8a]">
+                          {new Date(item.created_at).toLocaleDateString()}
+                        </span>
+                      </div>
+                    ))}
+                    {thoughts.length > 2 ? (
+                      <a
+                        href="#/moods"
+                        className="inline-block mt-1 text-xs text-[#e8b4b8] hover:text-[#d4a5a9]"
+                      >
+                        查看更多心情…
+                      </a>
+                    ) : null}
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        ) : (
+          <div className="max-w-4xl mx-auto mt-10 lg:mt-14 space-y-8">
+            <div className="bg-white/80 rounded-2xl border border-[#e8b4b8]/30 p-5 lg:p-6 shadow-[0_12px_30px_rgba(0,0,0,0.03)]">
+              <h3 className="text-xl md:text-2xl font-bold text-[#4a4a4a] font-['Bricolage_Grotesque'] mb-2">
+                Blogs
+              </h3>
+              <p className="text-[#8a8a8a] text-sm mb-3">Latest 2 updates</p>
+              <div className="flex justify-end mb-3">
+                <a
+                  href="#/blogs"
+                  className="text-xs text-[#e8b4b8] hover:text-[#d4a5a9] font-medium"
+                >
+                  {`View all blogs (${totalBlogs} total)`} &rarr;
+                </a>
+              </div>
+              <div className="space-y-6">
+                {latestBlogs.map((item) => (
+                  <article
+                    key={item.id}
+                    className="p-6 rounded-2xl bg-white border border-[#e8b4b8]/20 hover:border-[#e8b4b8]/40 transition-colors duration-300"
+                  >
+                    <div className="flex flex-wrap items-center gap-3 justify-between">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="px-3 py-1 bg-[#f5e6e8] text-[#d4a5a9] text-xs font-medium rounded-full border border-[#e8b4b8]/20">
+                          {t('news_filter_blog')}
+                        </span>
+                        <span className="text-[#8a8a8a] text-sm">{item.date}</span>
+                      </div>
+
+                      {item.href ? (
+                        <a
+                          href={item.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[#e8b4b8] hover:text-[#d4a5a9] text-sm font-medium transition-colors"
+                        >
+                          {t('news_btn_read')}
+                          <ExternalLink size={14} />
+                        </a>
+                      ) : null}
+                    </div>
+
+                    <h3 className="mt-4 text-xl md:text-2xl font-bold text-[#4a4a4a] font-['Bricolage_Grotesque']">
+                      {item.title.en}
+                    </h3>
+                    {item.excerpt ? (
+                      <p className="mt-3 text-[#8a8a8a] leading-relaxed">{item.excerpt.en}</p>
+                    ) : null}
+                  </article>
+                ))}
+              </div>
+            </div>
+
+            {/* English: Mood card as simple form, without recent titles */}
+            <div className="bg-white/80 rounded-2xl border border-[#e8b4b8]/30 p-5 lg:p-6 shadow-[0_12px_30px_rgba(0,0,0,0.03)]">
+              <h3 className="text-xl md:text-2xl font-bold text-[#4a4a4a] font-['Bricolage_Grotesque'] mb-2">
+                Mood
+              </h3>
+              <p className="text-[#8a8a8a] text-sm mb-4">
+                Write a short mood note for yourself. It will not be translated.
+              </p>
+              <a
+                href="#/moods"
+                className="inline-flex items-center text-xs text-[#e8b4b8] hover:text-[#d4a5a9] font-medium mb-4"
+              >
+                View all mood cards &rarr;
+              </a>
+
+              {!hasSupabaseConfig ? (
+                <div className="p-4 rounded-xl bg-white border border-[#e8b4b8]/30 text-sm text-[#8a8a8a]">
+                  Supabase is not configured. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.
+                </div>
+              ) : (
+                <form onSubmit={onSubmitThought} className="mt-2 p-4 rounded-2xl bg-white border border-[#e8b4b8]/20 space-y-3">
+                  <input
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Title (required)"
+                    className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
+                  />
+                  <textarea
+                    value={content}
+                    onChange={(e) => setContent(e.target.value)}
+                    placeholder="Content (optional)"
+                    rows={3}
+                    className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
+                  />
+                  <div className="flex flex-wrap items-center gap-3">
+                    <label className="text-sm text-[#8a8a8a]">Mood:</label>
+                    <select
+                      value={mood}
+                      onChange={(e) => setMood(e.target.value as MoodType | '')}
+                      className="px-3 py-2 rounded-xl border border-[#e8b4b8]/30 bg-white text-sm text-[#4a4a4a]"
+                    >
+                      <option value="">Not set (optional)</option>
+                      <option value="positive">😊 Happy</option>
+                      <option value="neutral">😌 Calm</option>
+                      <option value="tired">🥱 Tired</option>
+                      <option value="stressed">😣 Stressed</option>
+                      <option value="excited">🤩 Excited</option>
+                      <option value="anxious">😟 Anxious</option>
+                      <option value="confused">🤔 Confused</option>
+                      <option value="grateful">🙏 Grateful</option>
+                      <option value="sad">😢 Sad</option>
+                    </select>
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading || !title.trim()}
+                    className="px-5 py-2 rounded-full bg-[#e8b4b8] text-white text-sm font-medium disabled:opacity-60"
+                  >
+                    {loading ? 'Saving...' : 'Save mood'}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   );
