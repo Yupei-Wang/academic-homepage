@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useI18n } from '@/i18n/I18nProvider';
 import { newsItems, type NewsKind } from '@/content/newsItems';
-import { hasSupabaseConfig, supabase, type Thought } from '@/lib/supabase';
+import { hasSupabaseConfig, supabase, type Thought, type MoodType } from '@/lib/supabase';
 
 type Filter = 'all' | NewsKind;
 
@@ -12,6 +12,7 @@ export default function News() {
   const [thoughts, setThoughts] = useState<Thought[]>([]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [mood, setMood] = useState<MoodType | ''>('');
   const [loading, setLoading] = useState(false);
 
   const filtered = useMemo(() => {
@@ -41,7 +42,7 @@ export default function News() {
     try {
       const { data, error } = await supabase
         .from('thoughts')
-        .select('id,title,content,created_at')
+        .select('id,title,content,created_at,mood_type')
         .order('created_at', { ascending: false })
         .limit(20);
       if (error) {
@@ -66,6 +67,7 @@ export default function News() {
       const payload = {
         title: title.trim(),
         content: content.trim() || null,
+        mood_type: mood || null,
       };
       const { error } = await supabase.from('thoughts').insert(payload);
       if (error) {
@@ -78,6 +80,7 @@ export default function News() {
       }
       setTitle('');
       setContent('');
+      setMood('');
       await loadThoughts();
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -177,13 +180,19 @@ export default function News() {
 
         <div className="max-w-3xl mx-auto mt-16">
           <h3 className="text-2xl md:text-3xl font-bold text-[#4a4a4a] font-['Bricolage_Grotesque'] mb-4">
-            {lang === 'zh' ? '随笔 / 感想' : 'Thoughts'}
+            {lang === 'zh' ? '心情' : 'Mood'}
           </h3>
           <p className="text-[#8a8a8a] mb-6">
             {lang === 'zh'
-              ? '你可以直接在这里写短感悟并保存到 Supabase。'
-              : 'Write short thoughts here and save them to Supabase.'}
+              ? '你可以直接在这里写心情并保存到 Supabase。'
+              : 'Write moods here and save them to Supabase.'}
           </p>
+          <a
+            href="#/moods"
+            className="inline-flex items-center text-sm text-[#e8b4b8] hover:text-[#d4a5a9] font-medium mb-5"
+          >
+            {lang === 'zh' ? '查看全部心情卡片 ->' : 'View all mood cards ->'}
+          </a>
 
           {!hasSupabaseConfig ? (
             <div className="p-4 rounded-xl bg-white border border-[#e8b4b8]/30 text-sm text-[#8a8a8a]">
@@ -207,6 +216,29 @@ export default function News() {
                   rows={3}
                   className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
                 />
+                <div className="flex flex-wrap items-center gap-3">
+                  <label className="text-sm text-[#8a8a8a]">
+                    {lang === 'zh' ? '情绪标签：' : 'Mood:'}
+                  </label>
+                  <select
+                    value={mood}
+                    onChange={(e) => setMood(e.target.value as MoodType | '')}
+                    className="px-3 py-2 rounded-xl border border-[#e8b4b8]/30 bg-white text-sm text-[#4a4a4a]"
+                  >
+                    <option value="">
+                      {lang === 'zh' ? '未选择（可选）' : 'Not set (optional)'}
+                    </option>
+                    <option value="positive">{lang === 'zh' ? '开心' : 'Happy'}</option>
+                    <option value="neutral">{lang === 'zh' ? '平静' : 'Calm'}</option>
+                    <option value="tired">{lang === 'zh' ? '疲惫' : 'Tired'}</option>
+                    <option value="stressed">{lang === 'zh' ? '压力大' : 'Stressed'}</option>
+                    <option value="excited">{lang === 'zh' ? '兴奋' : 'Excited'}</option>
+                    <option value="anxious">{lang === 'zh' ? '焦虑' : 'Anxious'}</option>
+                    <option value="confused">{lang === 'zh' ? '困惑' : 'Confused'}</option>
+                    <option value="grateful">{lang === 'zh' ? '感激' : 'Grateful'}</option>
+                    <option value="sad">{lang === 'zh' ? '难受' : 'Sad'}</option>
+                  </select>
+                </div>
                 <button
                   type="submit"
                   disabled={loading || !title.trim()}
@@ -217,25 +249,28 @@ export default function News() {
                       ? '保存中...'
                       : 'Saving...'
                     : lang === 'zh'
-                      ? '保存感想'
-                      : 'Save thought'}
+                      ? '保存心情'
+                      : 'Save mood'}
                 </button>
               </form>
 
-              <div className="mt-6 space-y-3">
-                {thoughts.map((item) => (
-                  <article key={item.id} className="p-4 rounded-xl bg-white border border-[#e8b4b8]/20">
-                    <div className="flex items-center justify-between gap-2">
-                      <h4 className="font-semibold text-[#4a4a4a]">{item.title}</h4>
-                      <span className="text-xs text-[#8a8a8a]">
-                        {new Date(item.created_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                    {item.content ? (
-                      <p className="mt-2 text-sm text-[#8a8a8a] leading-relaxed">{item.content}</p>
-                    ) : null}
-                  </article>
+              <div className="mt-6 space-y-2">
+                {thoughts.slice(0, 2).map((item) => (
+                  <div key={item.id} className="flex items-center justify-between gap-2 text-sm">
+                    <span className="truncate text-[#4a4a4a] max-w-[70%]">{item.title}</span>
+                    <span className="text-xs text-[#8a8a8a]">
+                      {new Date(item.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
                 ))}
+                {thoughts.length > 2 ? (
+                  <a
+                    href="#/moods"
+                    className="inline-block mt-1 text-xs text-[#e8b4b8] hover:text-[#d4a5a9]"
+                  >
+                    {lang === 'zh' ? '查看更多心情…' : 'View more moods…'}
+                  </a>
+                ) : null}
               </div>
             </>
           )}

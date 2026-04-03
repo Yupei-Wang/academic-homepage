@@ -9,10 +9,22 @@ export const supabase = hasSupabaseConfig
   ? createClient(supabaseUrl!, supabaseAnonKey!)
   : null;
 
+export type MoodType =
+  | 'positive'
+  | 'neutral'
+  | 'tired'
+  | 'stressed'
+  | 'excited'
+  | 'anxious'
+  | 'confused'
+  | 'grateful'
+  | 'sad';
+
 export type Thought = {
   id: string;
   title: string;
   content: string | null;
   created_at: string;
+  mood_type: MoodType | null;
 };
 
