@@ -2,11 +2,21 @@ import { useEffect, useState } from 'react';
 import { ExternalLink } from 'lucide-react';
 import { useI18n } from '@/i18n/I18nProvider';
 import { newsItems } from '@/content/newsItems';
-import { hasSupabaseConfig, supabase, type Thought, type MoodType } from '@/lib/supabase';
+import {
+  AUTHOR_IDENTITY_OPTIONS,
+  authorIdentityLabel,
+  hasSupabaseConfig,
+  supabase,
+  type AuthorIdentityKey,
+  type Thought,
+  type MoodType,
+} from '@/lib/supabase';
 
 export default function News() {
   const { t, lang } = useI18n();
   const [thoughts, setThoughts] = useState<Thought[]>([]);
+  const [authorIdentity, setAuthorIdentity] = useState<AuthorIdentityKey | ''>('');
+  const [authorNickname, setAuthorNickname] = useState('');
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [mood, setMood] = useState<MoodType | ''>('');
@@ -32,7 +42,7 @@ export default function News() {
     try {
       const { data, error } = await supabase
         .from('thoughts')
-        .select('id,title,content,created_at,mood_type')
+        .select('id,author_identity,author_nickname,title,content,created_at,mood_type')
         .order('created_at', { ascending: false })
         .limit(20);
       if (error) {
@@ -51,10 +61,12 @@ export default function News() {
 
   const onSubmitThought = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!supabase || !title.trim()) return;
+    if (!supabase || !title.trim() || !authorIdentity || !authorNickname.trim()) return;
     setLoading(true);
     try {
       const payload = {
+        author_identity: authorIdentity,
+        author_nickname: authorNickname.trim(),
         title: title.trim(),
         content: content.trim() || null,
         mood_type: mood || null,
@@ -68,6 +80,8 @@ export default function News() {
         );
         return;
       }
+      setAuthorIdentity('');
+      setAuthorNickname('');
       setTitle('');
       setContent('');
       setMood('');
@@ -170,6 +184,27 @@ export default function News() {
               ) : (
                 <>
                   <form onSubmit={onSubmitThought} className="mt-2 p-4 rounded-2xl bg-white border border-[#e8b4b8]/20 space-y-3">
+                    <div>
+                      <label className="block text-sm text-[#8a8a8a] mb-1">身份（必选）</label>
+                      <select
+                        value={authorIdentity}
+                        onChange={(e) => setAuthorIdentity(e.target.value as AuthorIdentityKey | '')}
+                        className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 bg-white text-sm text-[#4a4a4a] focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
+                      >
+                        <option value="">请选择身份</option>
+                        {AUTHOR_IDENTITY_OPTIONS.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.zh}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <input
+                      value={authorNickname}
+                      onChange={(e) => setAuthorNickname(e.target.value)}
+                      placeholder="昵称（必填，如：小王）"
+                      className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
+                    />
                     <input
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
@@ -204,7 +239,7 @@ export default function News() {
                     </div>
                     <button
                       type="submit"
-                      disabled={loading || !title.trim()}
+                      disabled={loading || !title.trim() || !authorIdentity || !authorNickname.trim()}
                       className="px-5 py-2 rounded-full bg-[#e8b4b8] text-white text-sm font-medium disabled:opacity-60"
                     >
                       {loading ? '保存中...' : '保存心情'}
@@ -214,7 +249,13 @@ export default function News() {
                   <div className="mt-4 space-y-2">
                     {thoughts.slice(0, 2).map((item) => (
                       <div key={item.id} className="flex items-center justify-between gap-2 text-sm">
-                        <span className="truncate text-[#4a4a4a] max-w-[70%]">{item.title}</span>
+                        <span className="truncate text-[#4a4a4a] max-w-[70%]">
+                          {authorIdentityLabel(item.author_identity, lang) +
+                            ' · ' +
+                            (item.author_nickname ?? (lang === 'zh' ? '匿名' : 'Anonymous')) +
+                            ' · ' +
+                            item.title}
+                        </span>
                         <span className="text-xs text-[#8a8a8a]">
                           {new Date(item.created_at).toLocaleDateString()}
                         </span>
@@ -307,6 +348,27 @@ export default function News() {
                 </div>
               ) : (
                 <form onSubmit={onSubmitThought} className="mt-2 p-4 rounded-2xl bg-white border border-[#e8b4b8]/20 space-y-3">
+                  <div>
+                    <label className="block text-sm text-[#8a8a8a] mb-1">Identity (required)</label>
+                    <select
+                      value={authorIdentity}
+                      onChange={(e) => setAuthorIdentity(e.target.value as AuthorIdentityKey | '')}
+                      className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 bg-white text-sm text-[#4a4a4a] focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
+                    >
+                      <option value="">Select identity</option>
+                      {AUTHOR_IDENTITY_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.en}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <input
+                    value={authorNickname}
+                    onChange={(e) => setAuthorNickname(e.target.value)}
+                    placeholder="Nickname (required, e.g. Alex)"
+                    className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
+                  />
                   <input
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
@@ -341,7 +403,7 @@ export default function News() {
                   </div>
                   <button
                     type="submit"
-                    disabled={loading || !title.trim()}
+                    disabled={loading || !title.trim() || !authorIdentity || !authorNickname.trim()}
                     className="px-5 py-2 rounded-full bg-[#e8b4b8] text-white text-sm font-medium disabled:opacity-60"
                   >
                     {loading ? 'Saving...' : 'Save mood'}

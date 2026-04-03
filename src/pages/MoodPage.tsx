@@ -1,7 +1,13 @@
 import { useEffect, useState } from 'react';
 import { ArrowLeft } from 'lucide-react';
 import { useI18n } from '@/i18n/I18nProvider';
-import { hasSupabaseConfig, supabase, type Thought, type MoodType } from '@/lib/supabase';
+import {
+  authorIdentityLabel,
+  hasSupabaseConfig,
+  supabase,
+  type Thought,
+  type MoodType,
+} from '@/lib/supabase';
 
 const moodLabel = (m: MoodType | null, lang: 'zh' | 'en') => {
   if (!m) return lang === 'zh' ? '未分类' : 'Uncategorized';
@@ -43,7 +49,7 @@ export default function MoodPage() {
       }
       const { data } = await supabase
         .from('thoughts')
-        .select('id,title,content,created_at,mood_type')
+        .select('id,author_identity,author_nickname,title,content,created_at,mood_type')
         .order('created_at', { ascending: false });
       setItems((data ?? []) as Thought[]);
       setLoading(false);
@@ -68,8 +74,8 @@ export default function MoodPage() {
           </h1>
           <p className="mt-3 text-[#8a8a8a]">
             {lang === 'zh'
-              ? '这里记录每一次心情与短感悟。'
-              : 'A card view of every mood note and short reflection.'}
+              ? '公开留言板：请填写身份、昵称与内容。'
+              : 'Public board: fill in identity, nickname, and your note.'}
           </p>
         </div>
 
@@ -90,6 +96,11 @@ export default function MoodPage() {
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex flex-col gap-1">
                     <h3 className="font-semibold text-[#4a4a4a] text-lg">{item.title}</h3>
+                    <span className="text-xs text-[#8a8a8a]">
+                      {lang === 'zh'
+                        ? `身份：${authorIdentityLabel(item.author_identity, lang)} · ${item.author_nickname ?? '匿名'}`
+                        : `Identity: ${authorIdentityLabel(item.author_identity, lang)} · ${item.author_nickname ?? 'Anonymous'}`}
+                    </span>
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[#f5e6e8] text-xs text-[#d4a5a9] w-fit">
                       {moodLabel(item.mood_type, lang)}
                     </span>
