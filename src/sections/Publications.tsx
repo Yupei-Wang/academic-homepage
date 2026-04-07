@@ -8,16 +8,16 @@ const publications = [
     title: 'ShopSimulator: Evaluating and Exploring RL-Driven LLM Agent for Shopping Assistants',
     authors: 'P Wang, Y Wu, Xiaoshuai Song, Weixun Wang, Gengru Chen, ...',
     venue: 'arXiv preprint arXiv:2601.18225',
-    citations: 0,
+    citations: 1,
     abstract:
       '提出了一个用于评估和训练 RL 驱动大模型购物助手的大规模电商模拟环境，系统分析了不同模型在个性化、多轮交互和复杂商品检索场景下的表现，并探讨了监督微调与强化学习结合的效果。',
     link: 'https://arxiv.org/abs/2601.18225',
   },
   {
-    year: '2024',
+    year: '2025',
     title: 'MTU-Bench: A Multi-Granularity Tool-Use Benchmark for Large Language Models',
     authors: 'P Wang, Y Wu, Z Wang, J Liu, X Song, Z Peng, K Deng, C Zhang, J Wang, ...',
-    venue: 'arXiv preprint arXiv:2410.11710',
+    venue: '【ICLR 2025】International Conference on Learning Representations 2025',
     citations: 17,
     abstract:
       '提出了一个多粒度的工具使用基准测试，用于全面评估大语言模型的工具学习和使用能力。',
@@ -27,17 +27,27 @@ const publications = [
     year: '2024',
     title: 'Beyond the Known: Investigating LLMs Performance on Out-of-Domain Intent Detection',
     authors: 'P Wang, K He, Y Wang, X Song, Y Mou, J Wang, Y Xian, X Cai, W Xu',
-    venue: 'Proceedings of the 2024 Joint International Conference on Computational Linguistics',
+    venue: '【COLING 2024】The 2024 Joint International Conference on Computational Linguistics, Language Resources and Evaluation',
     citations: 32,
     abstract:
       '本文深入研究了大语言模型在开放域意图检测任务上的性能表现，提出了一系列评估方法和改进策略。',
     link: 'https://scholar.google.com/citations?view_op=view_citation&hl=en&user=3YPB1hMAAAAJ&citation_for_view=3YPB1hMAAAAJ:YsMSGLbcyi4C',
   },
   {
+    year: '2024',
+    title: 'DolphCoder: Echo-Locating Code Large Language Models with Diverse and Multi-Objective Instruction Tuning',
+    authors: 'Y Wang, K He, G Dong, P Wang, W Zeng, M Diao, W Xu, ...',
+    venue: '【ACL 2024】Association for Computational Linguistics',
+    citations: 13,
+    abstract:
+      '提出了一个多样化的多目标指令微调框架，用于训练代码大语言模型，显著提升了模型在代码生成、理解和修改任务上的性能。',
+    link: 'https://aclanthology.org/2024.acl-long.259.pdf',
+  },
+  {
     year: '2023',
     title: 'Watch the Neighbors: A Unified K-Nearest Neighbor Contrastive Learning Framework for OOD Intent Discovery',
     authors: 'P Wang, K He, Y Mou, X Song, Y Wu, J Wang, Y Xian, X Cai, W Xu',
-    venue: 'Findings of the Association for Computational Linguistics: EMNLP 2023',
+    venue: '【EMNLP 2023】Findings of the Association for Computational Linguistics',
     citations: 20,
     abstract:
       '提出了一个统一的K近邻对比学习框架，用于开放域意图发现任务，显著提升了模型性能。',
@@ -47,7 +57,7 @@ const publications = [
     year: '2023',
     title: 'Large Language Models Meet Open-World Intent Discovery and Recognition: An Evaluation of ChatGPT',
     authors: 'X Song, K He, P Wang, G Dong, Y Mou, J Wang, Y Xian, X Cai, W Xu',
-    venue: 'Proceedings of the 2023 Conference on Empirical Methods in Natural Language Processing',
+    venue: '【EMNLP 2023】Findings of the Association for Computational Linguistics',
     citations: 27,
     abstract:
       '系统评估了ChatGPT在开放世界意图发现和识别任务上的表现，揭示了大语言模型的优势与局限。',
@@ -57,7 +67,7 @@ const publications = [
     year: '2023',
     title: 'Decoupling Pseudo Label Disambiguation and Representation Learning for Generalized Intent Discovery',
     authors: 'Y Mou, X Song, K He, C Zeng, P Wang, J Wang, Y Xian, W Xu',
-    venue: 'Proceedings of the 61st Annual Meeting of the Association for Computational Linguistics',
+    venue: '【ACL 2023】The 61st Annual Meeting of the Association for Computational Linguistics',
     citations: 13,
     abstract:
       '解耦了伪标签消歧和表示学习两个过程，提出了一种新的广义意图发现方法。',
@@ -67,7 +77,7 @@ const publications = [
     year: '2022',
     title: 'Generalized Intent Discovery: Learning from Open World Dialogue System',
     authors: 'Y Mou, K He, P Wang, Y Wu, J Wang, W Wu, W Xu',
-    venue: 'Proceedings of the 2022 Conference on Empirical Methods in Natural Language Processing',
+    venue: '【EMNLP 2022】Findings of the Association for Computational Linguistics',
     citations: 10,
     abstract:
       '研究了从开放世界对话系统中学习广义意图的方法，为实际应用场景提供了有效解决方案。',
