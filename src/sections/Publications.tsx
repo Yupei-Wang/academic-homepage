@@ -6,7 +6,7 @@ const publications = [
   {
     year: '2025',
     title: 'ShopSimulator: Evaluating and Exploring RL-Driven LLM Agent for Shopping Assistants',
-    authors: 'Z Zhang, X Liu, Y Li, et al.',
+    authors: 'P Wang, Y Wu, Xiaoshuai Song, Weixun Wang, Gengru Chen, ...',
     venue: 'arXiv preprint arXiv:2601.18225',
     citations: 0,
     abstract:

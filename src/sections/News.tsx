@@ -13,6 +13,8 @@ import {
 } from '@/lib/supabase';
 
 export default function News() {
+  const SUBMIT_COOLDOWN_MS = 30 * 1000;
+  const COOLDOWN_STORAGE_KEY = 'thought_submit_cooldown_until';
   const { t, lang } = useI18n();
   const [thoughts, setThoughts] = useState<Thought[]>([]);
   const [authorIdentity, setAuthorIdentity] = useState<AuthorIdentityKey | ''>('');
@@ -21,6 +23,8 @@ export default function News() {
   const [content, setContent] = useState('');
   const [mood, setMood] = useState<MoodType | ''>('');
   const [loading, setLoading] = useState(false);
+  const [cooldownUntil, setCooldownUntil] = useState(0);
+  const [now, setNow] = useState(Date.now());
 
   const sortedNews = [...newsItems].sort((a, b) => (a.date < b.date ? 1 : -1));
   const totalBlogs = sortedNews.length;
@@ -59,16 +63,49 @@ export default function News() {
     void loadThoughts();
   }, []);
 
+  useEffect(() => {
+    const saved = Number(localStorage.getItem(COOLDOWN_STORAGE_KEY) ?? 0);
+    if (Number.isFinite(saved) && saved > Date.now()) {
+      setCooldownUntil(saved);
+    }
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const cooldownLeftSec = Math.max(0, Math.ceil((cooldownUntil - now) / 1000));
+
   const onSubmitThought = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!supabase || !title.trim() || !authorIdentity || !authorNickname.trim()) return;
+    const titleTrimmed = title.trim();
+    const nicknameTrimmed = authorNickname.trim();
+    const contentTrimmed = content.trim();
+    if (!supabase || !titleTrimmed || !authorIdentity || !nicknameTrimmed) return;
+    if (cooldownUntil > Date.now()) {
+      alert(
+        lang === 'zh'
+          ? `提交过快，请 ${cooldownLeftSec} 秒后再试。`
+          : `You're posting too fast. Try again in ${cooldownLeftSec}s.`,
+      );
+      return;
+    }
+    if (nicknameTrimmed.length > 30 || titleTrimmed.length > 80 || contentTrimmed.length > 500) {
+      alert(
+        lang === 'zh'
+          ? '字数超出限制：昵称最多30字，标题最多80字，内容最多500字。'
+          : 'Text too long: nickname max 30, title max 80, content max 500.',
+      );
+      return;
+    }
     setLoading(true);
     try {
       const payload = {
         author_identity: authorIdentity,
-        author_nickname: authorNickname.trim(),
-        title: title.trim(),
-        content: content.trim() || null,
+        author_nickname: nicknameTrimmed,
+        title: titleTrimmed,
+        content: contentTrimmed || null,
         mood_type: mood || null,
       };
       const { error } = await supabase.from('thoughts').insert(payload);
@@ -85,6 +122,9 @@ export default function News() {
       setTitle('');
       setContent('');
       setMood('');
+      const nextCooldownUntil = Date.now() + SUBMIT_COOLDOWN_MS;
+      setCooldownUntil(nextCooldownUntil);
+      localStorage.setItem(COOLDOWN_STORAGE_KEY, String(nextCooldownUntil));
       await loadThoughts();
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
@@ -207,12 +247,14 @@ export default function News() {
                       value={authorNickname}
                       onChange={(e) => setAuthorNickname(e.target.value)}
                       placeholder="昵称（必填，如：小王）"
+                      maxLength={30}
                       className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
                     />
                     <input
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="标题（必填）"
+                      maxLength={80}
                       className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
                     />
                     <textarea
@@ -220,6 +262,7 @@ export default function News() {
                       onChange={(e) => setContent(e.target.value)}
                       placeholder="内容（可选）"
                       rows={3}
+                      maxLength={500}
                       className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
                     />
                     <div className="flex flex-wrap items-center gap-3">
@@ -243,11 +286,20 @@ export default function News() {
                     </div>
                     <button
                       type="submit"
-                      disabled={loading || !title.trim() || !authorIdentity || !authorNickname.trim()}
+                      disabled={
+                        loading ||
+                        cooldownLeftSec > 0 ||
+                        !title.trim() ||
+                        !authorIdentity ||
+                        !authorNickname.trim()
+                      }
                       className="px-5 py-2 rounded-full bg-[#e8b4b8] text-white text-sm font-medium disabled:opacity-60"
                     >
-                      {loading ? '保存中...' : '保存心情'}
+                      {loading ? '保存中...' : cooldownLeftSec > 0 ? `${cooldownLeftSec}s 后可再发` : '保存心情'}
                     </button>
+                    {cooldownLeftSec > 0 ? (
+                      <p className="text-xs text-[#8a8a8a]">为防刷屏，提交后需等待 30 秒。</p>
+                    ) : null}
                   </form>
 
                   <div className="mt-4 space-y-2">
@@ -377,12 +429,14 @@ export default function News() {
                       value={authorNickname}
                       onChange={(e) => setAuthorNickname(e.target.value)}
                       placeholder="Nickname (required, e.g. Alex)"
+                    maxLength={30}
                       className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
                     />
                     <input
                       value={title}
                       onChange={(e) => setTitle(e.target.value)}
                       placeholder="Title (required)"
+                    maxLength={80}
                       className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
                     />
                     <textarea
@@ -390,6 +444,7 @@ export default function News() {
                       onChange={(e) => setContent(e.target.value)}
                       placeholder="Content (optional)"
                       rows={3}
+                    maxLength={500}
                       className="w-full px-4 py-3 rounded-xl border border-[#e8b4b8]/30 focus:outline-none focus:ring-2 focus:ring-[#e8b4b8]/30"
                     />
                     <div className="flex flex-wrap items-center gap-3">
@@ -413,11 +468,16 @@ export default function News() {
                     </div>
                     <button
                       type="submit"
-                      disabled={loading || !title.trim() || !authorIdentity || !authorNickname.trim()}
+                    disabled={
+                      loading || cooldownLeftSec > 0 || !title.trim() || !authorIdentity || !authorNickname.trim()
+                    }
                       className="px-5 py-2 rounded-full bg-[#e8b4b8] text-white text-sm font-medium disabled:opacity-60"
                     >
-                      {loading ? 'Saving...' : 'Save mood'}
+                    {loading ? 'Saving...' : cooldownLeftSec > 0 ? `Wait ${cooldownLeftSec}s` : 'Save mood'}
                     </button>
+                  {cooldownLeftSec > 0 ? (
+                    <p className="text-xs text-[#8a8a8a]">To reduce spam, wait 30 seconds after each post.</p>
+                  ) : null}
                   </form>
                 </>
               )}
